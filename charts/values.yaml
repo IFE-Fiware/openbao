@@ -1,0 +1,13 @@
+agentList: {}
+
+secrets:
+  role: "accessrole_name"
+  secretEngine: name
+
+namespaceTag: nstag
+cluster:
+  namespace: ns
+domainSuffix: int.simpl-europe.eu
+
+mailpit:
+  enabled: true
