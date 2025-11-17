@@ -5,7 +5,7 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: openbao-{{ .Values.cluster.namespace }}-agent-injector
+      serviceAccountName: openbao-{{ .Values.cluster.namespace }}-svc-account
       initContainers:
       - name: 0-init
         image: "quay.io/openbao/openbao:2.4.0"
@@ -112,10 +112,10 @@ spec:
               capabilities = ["update"]
             }
             path "secret/data/cloud-accounts/*" {
-              capabilities = ["read"]
+              capabilities = ["create", "read", "update", "list"]
             }
             path "secret/data/cloud-accounts/*/*" {
-              capabilities = ["read"]
+              capabilities = ["create", "read", "update", "list"]
             }
             EOF
 
@@ -363,13 +363,16 @@ spec:
               VAULT_TOKEN="$VAULT_TOKEN"
             if ! bao kv get -mount={{ $.Values.secrets.secretEngine }} {{ . }}-infrastructure-be > /dev/null 2>&1; then
               bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-infrastructure-be \
+                gitea.token="giteatoken" \
+                infrastructure.api.config.value="Bearer tok_uuid" \
                 kafka.sasl.enabled=true \
                 kafka.sasl.password="${{ . }}_infrabe" \
                 kafka.sasl.username="{{ . }}_infrabe" \
                 spring.datasource.password="${{ . }}_infrabedb" \
                 spring.datasource.username="{{ . }}_infrabe" \
                 spring.mail.password="smtppassword" \
-                spring.mail.username="no-reply@simplservices.com"
+                spring.mail.username="no-reply@simplservices.com" \
+                vault.token="$VAULT_TOKEN"
             fi
             if ! bao kv get -mount={{ $.Values.secrets.secretEngine }} {{ . }}-simpl-edc > /dev/null 2>&1; then
               bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-simpl-edc \
