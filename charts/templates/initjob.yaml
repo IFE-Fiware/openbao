@@ -35,7 +35,7 @@ spec:
           - |
             if [ -f /etc/alpine-release ]; then apk add jq; fi
 
-            timeout 300 bash -c 'while [ ! -f /data/init.json ]; do sleep 5; done' || exit 1
+            timeout 300 sh -c 'while [ ! -f /data/init.json ]; do sleep 5; done' || exit 1
 
             UNSEAL_KEYS=$(cat /data/init.json | jq -r '.unseal_keys_b64[]')
             ROOT_TOKEN=$(cat /data/init.json | jq -r '.root_token')
