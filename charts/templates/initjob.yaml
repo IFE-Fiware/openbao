@@ -41,7 +41,7 @@ spec:
             ROOT_TOKEN=$(cat /data/init.json | jq -r '.root_token')
 
             # Create secret with unseal keys
-            kubectl delete secret secrets-unseal-keys -i --force
+            echo "y" | kubectl delete secret secrets-unseal-keys -i
             kubectl create secret generic secrets-unseal-keys \
               --from-literal=key1=$(echo $UNSEAL_KEYS | cut -d' ' -f1) \
               --from-literal=key2=$(echo $UNSEAL_KEYS | cut -d' ' -f2) \
@@ -50,7 +50,7 @@ spec:
               --from-literal=key5=$(echo $UNSEAL_KEYS | cut -d' ' -f2) || true
 
             # Create secret with root token
-            kubectl delete secret secrets-root-token -i --force
+            echo "y" | kubectl delete secret secrets-root-token -i
             kubectl create secret generic secrets-root-token \
               --from-literal=token=$ROOT_TOKEN || true
         volumeMounts:
