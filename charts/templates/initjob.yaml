@@ -173,10 +173,10 @@ spec:
             if ! bao kv get -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-kafka-credentials > /dev/null 2>&1; then
               bao kv put -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-kafka-credentials \
                 {{- range .Values.agentList.authorities }}
-                {{ . }}_authprovider="${{ . }}_authprovider" \
-                {{ . }}_usersroles="${{ . }}_usersroles" \
-                {{ . }}_onboarding="${{ . }}_onboarding" \
-                {{ . }}_tier2gw="${{ . }}_tier2gw" \
+                {{ . }}_authprovider=${{ . }}_authprovider \
+                {{ . }}_usersroles=${{ . }}_usersroles \
+                {{ . }}_onboarding=${{ . }}_onboarding \
+                {{ . }}_tier2gw=${{ . }}_tier2gw \
                 {{- end }}
                 {{- range .Values.agentList.providers }}
                 {{ . }}_authprovider=${{ . }}_authprovider \
