@@ -168,31 +168,33 @@ spec:
                 KAFKA_CLIENT_PASSWORDS=$icms
             fi
             bao kv put -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-vault token=$VAULT_TOKEN
-            bao kv put -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-kafka-credentials \
-              redpanda=$redpanda \
-              notification=$notification \
-              icms=$icms \
-              {{- range .Values.agentList.authorities }}
-              {{ . }}_authprovider=${{ . }}_authprovider \
-              {{ . }}_usersroles=${{ . }}_usersroles \
-              {{ . }}_onboarding=${{ . }}_onboarding \
-              {{ . }}_tier2gw=${{ . }}_tier2gw \
-              {{- end }}
-              {{- range .Values.agentList.providers }}
-              {{ . }}_authprovider=${{ . }}_authprovider \
-              {{ . }}_usersroles=${{ . }}_usersroles \
-              {{ . }}_contract=${{ . }}_contract \
-              {{ . }}_infrabe=${{ . }}_infrabe \
-              {{ . }}_tier2gw=${{ . }}_tier2gw \
-              {{- end }}
-              {{- range .Values.agentList.consumers }}
-              {{ . }}_authprovider=${{ . }}_authprovider \
-              {{ . }}_usersroles=${{ . }}_usersroles \
-              {{ . }}_contract=${{ . }}_contract \
-              {{ . }}_contract_consumption=${{ . }}_contract_consumption \
-              {{ . }}_tier2gw=${{ . }}_tier2gw \
-              {{ . }}_edcconn=${{ . }}_edcconn
-              {{- end }}
+            if ! bao kv get -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-kafka-credentials > /dev/null 2>&1; then
+              bao kv put -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-kafka-credentials \
+                {{- range .Values.agentList.authorities }}
+                {{ . }}_authprovider="${{ . }}_authprovider" \
+                {{ . }}_usersroles="${{ . }}_usersroles" \
+                {{ . }}_onboarding="${{ . }}_onboarding" \
+                {{ . }}_tier2gw="${{ . }}_tier2gw" \
+                {{- end }}
+                {{- range .Values.agentList.providers }}
+                {{ . }}_authprovider=${{ . }}_authprovider \
+                {{ . }}_usersroles=${{ . }}_usersroles \
+                {{ . }}_contract=${{ . }}_contract \
+                {{ . }}_infrabe=${{ . }}_infrabe \
+                {{ . }}_tier2gw=${{ . }}_tier2gw \
+                {{- end }}
+                {{- range .Values.agentList.consumers }}
+                {{ . }}_authprovider=${{ . }}_authprovider \
+                {{ . }}_usersroles=${{ . }}_usersroles \
+                {{ . }}_contract=${{ . }}_contract \
+                {{ . }}_contract_consumption=${{ . }}_contract_consumption \
+                {{ . }}_tier2gw=${{ . }}_tier2gw \
+                {{ . }}_edcconn=${{ . }}_edcconn \
+                {{- end }}
+                redpanda=$redpanda \
+                notification=$notification \
+                icms=$icms
+            fi
             {{- if .Values.mailpit.enabled }}
             bao kv put -mount={{ .Values.secrets.secretEngine }} {{ .Values.cluster.namespace }}-mailpit admin=$mailpit_pass
             {{- end }}
