@@ -22,7 +22,7 @@ spec:
             }
         env:
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
           - name: VAULT_SKIP_VERIFY
             value: "true"
         volumeMounts:
@@ -66,7 +66,7 @@ spec:
             bao operator unseal $key3
         env:
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
         envFrom:
         - secretRef:
             name: secrets-unseal-keys
@@ -84,7 +84,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
       - name: 4-transit-secretengine
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
@@ -99,7 +99,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
       - name: 5-kubernetes-policy-role
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
@@ -147,7 +147,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
       - name: 6-common-secrets
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
@@ -210,7 +210,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
+            value: https://secrets-{{ .Values.namespaceTag }}-{{ .Values.domainSuffix }}
           - name: "redpanda_pass"
             valueFrom:
               secretKeyRef:
@@ -246,12 +246,12 @@ spec:
               SPRING_DATASOURCE_PASSWORD=${{ . }}_fcservice \
               SPRING_DATASOURCE_URL="jdbc:postgresql://pg-cluster.{{ $.Values.cluster.namespace }}.svc.cluster.local:5432/{{ . }}_fcservice" \
               SPRING_DATASOURCE_USERNAME="{{ . }}_fcservice" \
-              OTEL_EXPORTER_OTLP_ENDPOINT="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
+              OTEL_EXPORTER_OTLP_ENDPOINT="http://collector-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}" \
               OTEL_RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT="{{ $.Values.domainSuffix }}" \
               OTEL_SDK_DISABLED="false"
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-adapter-simpl-backend \
               FEDERATED_CATALOOGUE_CLIENT_URL="http://xsfc-service:8081" \
-              OTEL_EXPORTER_OTLP_ENDPOINT="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
+              OTEL_EXPORTER_OTLP_ENDPOINT="http://collector-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}" \
               OTEL_RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT="{{ $.Values.domainSuffix }}" \
               OTEL_SDK_DISABLED="false"
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-redis \
@@ -282,7 +282,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}
+            value: https://secrets-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}
           - name: "{{ . }}_kcadmin"
             valueFrom:
               secretKeyRef:
@@ -370,7 +370,7 @@ spec:
               HTTP_WRITE_TIMEOUT="10s" \
               LOG_ENCODING="json" \
               LOG_LEVEL="debug" \
-              VAULT_ADRESS="https://secrets.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
+              VAULT_ADRESS="https://secrets-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}" \
               VAULT_TOKEN="$VAULT_TOKEN"
             if ! bao kv get -mount={{ $.Values.secrets.secretEngine }} {{ . }}-infrastructure-be > /dev/null 2>&1; then
               bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-infrastructure-be \
@@ -396,7 +396,7 @@ spec:
                 edc_ionos_secret_key="secretkeystring" \
                 edc_ionos_token="tokenstring" \
                 otel_experimental_log_level="debug" \
-                otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
+                otel_exporter_otlp_endpoint="http://collector-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
                 otel_instrumentation_http_url_connection_enabled="false" \
                 otel_instrumentation_jdbc_enabled="false" \
@@ -420,7 +420,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}
+            value: https://secrets-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}
           - name: "{{ . }}_kcadmin"
             valueFrom:
               secretKeyRef:
@@ -501,7 +501,7 @@ spec:
                 edc_ionos_secret_key="secretkeystring" \
                 edc_ionos_token="tokenstring" \
                 otel_experimental_log_level="debug" \
-                otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
+                otel_exporter_otlp_endpoint="http://collector-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
                 otel_instrumentation_http_url_connection_enabled="false" \
                 otel_instrumentation_jdbc_enabled="false" \
@@ -524,7 +524,7 @@ spec:
                 name: secrets-root-token
                 key: token
           - name: VAULT_ADDR
-            value: https://secrets.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}
+            value: https://secrets-{{ $.Values.namespaceTag }}-{{ $.Values.domainSuffix }}
           - name: "{{ . }}_kcadmin"
             valueFrom:
               secretKeyRef:
