@@ -44,3 +44,5 @@ Example of agentList:
       - consumer01
       providers:
       - dataprovider01
+
+Agent names cannot contain "-" character.
