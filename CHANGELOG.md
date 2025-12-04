@@ -1,3 +1,7 @@
+## 1.1.2 (2025-12-04)
+
+Moved the initialisation part to another repository, only the configuration is left here.
+
 ## 1.1.1 (2025-11-26)
 
 Switch kubectl image from Bitnami to Alpine.
