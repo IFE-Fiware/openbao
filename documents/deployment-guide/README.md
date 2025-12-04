@@ -1,7 +1,7 @@
-# OpenBao initialisation for SIMPL
+# OpenBao configuration for SIMPL
 
 ## Description
-This project contains the configuration files required for OpenBao initialisation using Helm, preconfigured for use with SIMPL project.
+This project contains the configuration files required for OpenBao configuration using Helm, preconfigured for use with SIMPL project.
 
 ## Pre-Requisites
 
