@@ -1,2 +1,2 @@
-name: openbao-init
+name: openbao-config
 version: ${PROJECT_RELEASE_VERSION}

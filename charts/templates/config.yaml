@@ -1,76 +1,13 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: init-bao
+  name: openbao-config
 spec:
   template:
     spec:
       serviceAccountName: openbao-{{ .Values.cluster.namespace }}-svc-account
       initContainers:
-      - name: 0-init
-        image: "quay.io/openbao/openbao:2.4.0"
-        command: [sh, -c]
-        args:
-          - |
-            until wget --spider --quiet --timeout=10 --tries=1 --no-check-certificate $VAULT_ADDR 2>/dev/null; do
-              echo "Waiting for OpenBao to be accessible..."
-              sleep 5
-            done
-
-            bao operator init -format json >> /data/init.json || {
-              echo "Init failed (possibly already initialized), continuing..."
-            }
-        env:
-          - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
-          - name: VAULT_SKIP_VERIFY
-            value: "true"
-        volumeMounts:
-        - name: init-bao-volume
-          mountPath: /data
-      - name: 1-bao-secret
-        image: "alpine/kubectl:latest"
-        command: [sh, -c]
-        args:
-          - |
-            if [ -f /etc/alpine-release ]; then apk add jq; fi
-
-            timeout 300 sh -c 'while [ ! -f /data/init.json ]; do sleep 5; done' || exit 1
-
-            UNSEAL_KEYS=$(cat /data/init.json | jq -r '.unseal_keys_b64[]')
-            ROOT_TOKEN=$(cat /data/init.json | jq -r '.root_token')
-
-            # Create secret with unseal keys
-            echo "y" | kubectl delete secret secrets-unseal-keys -i
-            kubectl create secret generic secrets-unseal-keys \
-              --from-literal=key1=$(echo $UNSEAL_KEYS | cut -d' ' -f1) \
-              --from-literal=key2=$(echo $UNSEAL_KEYS | cut -d' ' -f2) \
-              --from-literal=key3=$(echo $UNSEAL_KEYS | cut -d' ' -f3) \
-              --from-literal=key4=$(echo $UNSEAL_KEYS | cut -d' ' -f2) \
-              --from-literal=key5=$(echo $UNSEAL_KEYS | cut -d' ' -f2) || true
-
-            # Create secret with root token
-            echo "y" | kubectl delete secret secrets-root-token -i
-            kubectl create secret generic secrets-root-token \
-              --from-literal=token=$ROOT_TOKEN || true
-        volumeMounts:
-        - name: init-bao-volume
-          mountPath: /data
-      - name: 2-unseal
-        image: "quay.io/openbao/openbao:2.4.0"
-        command: [sh, -c]
-        args:
-          - |
-            bao operator unseal $key1
-            bao operator unseal $key2
-            bao operator unseal $key3
-        env:
-          - name: VAULT_ADDR
-            value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
-        envFrom:
-        - secretRef:
-            name: secrets-unseal-keys
-      - name: 3-kv-secretengine
+      - name: 1-kv-secretengine
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -85,7 +22,7 @@ spec:
                 key: token
           - name: VAULT_ADDR
             value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
-      - name: 4-transit-secretengine
+      - name: 2-transit-secretengine
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -100,7 +37,7 @@ spec:
                 key: token
           - name: VAULT_ADDR
             value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
-      - name: 5-kubernetes-policy-role
+      - name: 3-kubernetes-policy-role
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -148,7 +85,7 @@ spec:
                 key: token
           - name: VAULT_ADDR
             value: https://secrets.{{ .Values.namespaceTag }}.{{ .Values.domainSuffix }}
-      - name: 6-common-secrets
+      - name: 4-common-secrets
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -232,7 +169,7 @@ spec:
                 name: "mailpit-secrets"
                 key: ui
       {{- range .Values.agentList.authorities }}
-      - name: 6-authority-secrets
+      - name: 5-authority-secrets
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -340,7 +277,7 @@ spec:
                 key: password
       {{- end }}
       {{- range .Values.agentList.providers }}
-      - name: 6-provider-secrets
+      - name: 5-provider-secrets
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -463,7 +400,7 @@ spec:
                 key: password
       {{- end }}
       {{- range .Values.agentList.consumers }}
-      - name: 6-consumer-secrets
+      - name: 5-consumer-secrets
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
