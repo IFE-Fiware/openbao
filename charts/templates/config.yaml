@@ -114,6 +114,7 @@ spec:
                 {{ . }}_usersroles=${{ . }}_usersroles \
                 {{ . }}_onboarding=${{ . }}_onboarding \
                 {{ . }}_tier2gw=${{ . }}_tier2gw \
+                {{ . }}_schemamgr=${{ . }}_schemamgr \
                 {{- end }}
                 {{- range .Values.agentList.providers }}
                 {{ . }}_authprovider=${{ . }}_authprovider \
@@ -180,7 +181,7 @@ spec:
               GRAPHSTORE_PASSWORD="neo12345" \
               GRAPHSTORE_QUERY_TIMEOUT_IN_SECONDS="5" \
               GRAPHSTORE_URI="bolt://xsfc-neo4j:7687" \
-              SPRING_DATASOURCE_PASSWORD=${{ . }}_fcservice \
+              SPRING_DATASOURCE_PASSWORD=${{ . }}_fcservicedb \
               SPRING_DATASOURCE_URL="jdbc:postgresql://pg-cluster.{{ $.Values.cluster.namespace }}.svc.cluster.local:5432/{{ . }}_fcservice" \
               SPRING_DATASOURCE_USERNAME="{{ . }}_fcservice" \
               OTEL_EXPORTER_OTLP_ENDPOINT="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
@@ -195,23 +196,29 @@ spec:
               rediscommander=$commander \
               redis=$redis
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-postgres-passwords \
-              {{ . }}-authenticationprovider=${{ . }}_authenticationprovider \
-              {{ . }}-ejbca=${{ . }}_ejbca \
-              {{ . }}-identityprovider=${{ . }}_identityprovider \
-              {{ . }}-keycloak=${{ . }}_keycloak \
-              {{ . }}-onboarding=${{ . }}_onboarding \
-              {{ . }}-securityattributesprovider=${{ . }}_securityattributesprovider \
-              {{ . }}-usersroles=${{ . }}_usersroles
+              {{ . }}-authenticationprovider=${{ . }}_authenticationproviderdb \
+              {{ . }}-ejbca=${{ . }}_ejbcadb \
+              {{ . }}-identityprovider=${{ . }}_identityproviderdb \
+              {{ . }}-keycloak=${{ . }}_keycloakdb \
+              {{ . }}-onboarding=${{ . }}_onboardingdb \
+              {{ . }}-securityattributesprovider=${{ . }}_securityattributesproviderdb \
+              {{ . }}-usersroles=${{ . }}_usersrolesdb
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-keycloak admin=${{ . }}_kcadmin
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-ejbca keystorepass=${{ . }}_ejbcakspass
             if ! bao kv get -mount={{ $.Values.secrets.secretEngine }} {{ . }}-simpl-schema-manager > /dev/null 2>&1; then
               bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-simpl-schema-manager \
-                ADMIN_PASSWORD=${{ . }}_schemamgr \
-                FUSEKI_BASE_URL="http://fuseki-service.{{ . }}.svc.cluster.local:3030"
+                ADMIN_PASSWORD=${{ . }}_schemamgradmin \
+                FUSEKI_BASE_URL="http://fuseki-service.{{ . }}.svc.cluster.local:3030" \
+                KAFKA_BOOTSTRAP_SERVERS="http://kafka.{{ $.Values.cluster.namespace }}.svc.cluster.local:9092" \
+                KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT \
+                KAFKA_SASL_MECHANISM=PLAIN \
+                KAFKA_SASL_JAAS_CONFIG="'org.apache.kafka.common.security.plain.PlainLoginModule required username=\"{{ . }}_schemamgr\" password=\"${{ . }}_schemamgr\";'"
             fi    
         envFrom:
           - secretRef:
               name: redis-secrets
+          - secretRef:
+              name: kafka-users-secret
         env:
           - name: VAULT_TOKEN
             valueFrom:
@@ -230,47 +237,47 @@ spec:
               secretKeyRef:
                 name: "ejbca-secret"
                 key: "keystorepass"
-          - name: "{{ . }}_schemamgr"
+          - name: "{{ . }}_schemamgradmin"
             valueFrom:
               secretKeyRef:
                 name: "schema-manager-secret"
                 key: "admin"
-          - name: "{{ . }}_fcservice"
+          - name: "{{ . }}_fcservicedb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-fcservice.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_authenticationprovider"
+          - name: "{{ . }}_authenticationproviderdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-authenticationprovider.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_ejbca"
+          - name: "{{ . }}_ejbcadb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-ejbca.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_identityprovider"
+          - name: "{{ . }}_identityproviderdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-identityprovider.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_keycloak"
+          - name: "{{ . }}_keycloakdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-keycloak.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_onboarding"
+          - name: "{{ . }}_onboardingdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-onboarding.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_securityattributesprovider"
+          - name: "{{ . }}_securityattributesproviderdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-securityattributesprovider.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
-          - name: "{{ . }}_usersroles"
+          - name: "{{ . }}_usersrolesdb"
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-usersroles.pg-cluster.credentials.postgresql.acid.zalan.do"
@@ -294,6 +301,7 @@ spec:
               {{ . }}-keycloak=${{ . }}_keycloakdb \
               {{ . }}-usersroles=${{ . }}_usersrolesdb \
               {{ . }}-infrabe=${{ . }}_infrabedb \
+              {{ . }}-dagster=${{ . }}_dagsterdb \
               {{ . }}-edc=${{ . }}_edcdb
             bao kv put -mount={{ $.Values.secrets.secretEngine }} {{ . }}-redis \
               rediscommander=$commander \
@@ -327,11 +335,6 @@ spec:
                 contractmanager_apikey="apikey" \
                 edc_datasource_default_password="${{ . }}_edcdb" \
                 edc_datasource_policy_password="${{ . }}_edcdb" \
-                edc_ionos_access_key="accesskeystring" \
-                edc_ionos_endpoint="s3-eu-central-1.ionoscloud.com" \
-                edc_ionos_endpoint_region="de" \
-                edc_ionos_secret_key="secretkeystring" \
-                edc_ionos_token="tokenstring" \
                 otel_experimental_log_level="debug" \
                 otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
@@ -397,6 +400,11 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: "{{ . }}-usersroles.pg-cluster.credentials.postgresql.acid.zalan.do"
+                key: password
+          - name: "{{ . }}_dagsterdb"
+            valueFrom:
+              secretKeyRef:
+                name: "{{ . }}-dagster.pg-cluster.credentials.postgresql.acid.zalan.do"
                 key: password
       {{- end }}
       {{- range .Values.agentList.consumers }}
