@@ -1,3 +1,7 @@
+## 1.2.0 (2025-12-17)
+
+Changes for release 3.0.x of agents.
+
 ## 1.1.2 (2025-12-04)
 
 Moved the initialisation part to another repository, only the configuration is left here.
