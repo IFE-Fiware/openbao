@@ -326,8 +326,6 @@ spec:
                 kafka.sasl.username="{{ . }}_infrabe" \
                 spring.datasource.password="${{ . }}_infrabedb" \
                 spring.datasource.username="{{ . }}_infrabe" \
-                spring.mail.password="smtppassword" \
-                spring.mail.username="no-reply@simplservices.com" \
                 vault.token="$VAULT_TOKEN"
             fi
             if ! bao kv get -mount={{ $.Values.secrets.secretEngine }} {{ . }}-simpl-edc > /dev/null 2>&1; then
@@ -440,11 +438,6 @@ spec:
                 contractmanager_apikey="apikey" \
                 edc_datasource_default_password="${{ . }}_edcdb" \
                 edc_datasource_policy_password="${{ . }}_edcdb" \
-                edc_ionos_access_key="accesskeystring" \
-                edc_ionos_endpoint="s3-eu-central-1.ionoscloud.com" \
-                edc_ionos_endpoint_region="de" \
-                edc_ionos_secret_key="secretkeystring" \
-                edc_ionos_token="tokenstring" \
                 otel_experimental_log_level="debug" \
                 otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
