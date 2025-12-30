@@ -1,3 +1,7 @@
+## 1.2.1 (2025-12-19)
+
+Further cleanup in secrets.
+
 ## 1.2.0 (2025-12-17)
 
 Changes for release 3.0.x of agents.
