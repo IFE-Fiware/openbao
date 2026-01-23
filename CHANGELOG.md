@@ -1,3 +1,7 @@
+## 1.2.2 (2026-01-23)
+
+Added placeholders for Minio in EDC secrets.
+
 ## 1.2.1 (2025-12-19)
 
 Further cleanup in secrets.
