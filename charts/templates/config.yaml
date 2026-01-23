@@ -333,6 +333,9 @@ spec:
                 contractmanager_apikey="apikey" \
                 edc_datasource_default_password="${{ . }}_edcdb" \
                 edc_datasource_policy_password="${{ . }}_edcdb" \
+                fr_gxfs_s3_access_key="minioacckey" \
+                fr_gxfs_s3_endpoint="https://minio.address.eu" \
+                fr_gxfs_s3_secret_key="minioseckey" \
                 otel_experimental_log_level="debug" \
                 otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
@@ -438,6 +441,9 @@ spec:
                 contractmanager_apikey="apikey" \
                 edc_datasource_default_password="${{ . }}_edcdb" \
                 edc_datasource_policy_password="${{ . }}_edcdb" \
+                fr_gxfs_s3_access_key="minioacckey" \
+                fr_gxfs_s3_endpoint="https://minio.address.eu" \
+                fr_gxfs_s3_secret_key="minioseckey" \
                 otel_experimental_log_level="debug" \
                 otel_exporter_otlp_endpoint="http://collector.{{ $.Values.namespaceTag }}.{{ $.Values.domainSuffix }}" \
                 otel_exporter_otlp_protocol="http/protobuf" \
