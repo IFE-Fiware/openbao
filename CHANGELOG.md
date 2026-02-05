@@ -1,3 +1,7 @@
+## 1.2.3 (2026-02-05)
+
+Fixed multiple agent secret creation.
+
 ## 1.2.2 (2026-01-23)
 
 Added placeholders for Minio in EDC secrets.
