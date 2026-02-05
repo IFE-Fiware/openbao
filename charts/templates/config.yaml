@@ -170,7 +170,7 @@ spec:
                 name: "mailpit-secrets"
                 key: ui
       {{- range .Values.agentList.authorities }}
-      - name: 5-authority-secrets
+      - name: 5-authority-secrets-{{ . }}
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -284,7 +284,7 @@ spec:
                 key: password
       {{- end }}
       {{- range .Values.agentList.providers }}
-      - name: 5-provider-secrets
+      - name: 5-provider-secrets-{{ . }}
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
@@ -409,7 +409,7 @@ spec:
                 key: password
       {{- end }}
       {{- range .Values.agentList.consumers }}
-      - name: 5-consumer-secrets
+      - name: 5-consumer-secrets-{{ . }}
         image: "quay.io/openbao/openbao:2.4.0"
         command: [sh, -c]
         args:
